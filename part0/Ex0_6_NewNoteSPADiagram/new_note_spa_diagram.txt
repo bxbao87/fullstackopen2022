@@ -1,0 +1,8 @@
+sequenceDiagram
+Note over Browser: Get user input from the text field
+Note over Browser: Add new note to notes array on browser
+Note over Browser: Browser renders notes to display
+Browser->>Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa with user input in the payload
+
+Note over Server: Add new note to notes array on server
+Server-->>Browser: Response {"message":"note created"}
