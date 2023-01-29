@@ -1,7 +1,6 @@
 const Total = ({sum}) => {
-    console.log("in total", sum);
     return (
-        <p>total of {sum} exercises</p>
+        <p><b>total of {sum} exercises</b></p>
     )
 }
 
