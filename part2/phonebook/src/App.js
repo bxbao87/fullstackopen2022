@@ -3,12 +3,15 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [newNoti, setNewNoti] = useState(null)
+  const [userAction, setUserAction] = useState('added')
 
   useEffect(()=>{
     personService
@@ -39,7 +42,22 @@ const App = () => {
         personService
           .update({...existPerson, number: newNumber})
           .then(updatedPerson => {
+            setUserAction('updated')
+            setNewNoti(`Updated ${newName}`)
+            setTimeout(()=>{
+              setNewNoti(null)
+            }, 5000)
+
             setPersons(persons.map(person => person.id !== existPerson.id ? person : updatedPerson))
+          })
+          .catch(error => {
+            setUserAction('deleted')
+            setNewNoti(`Information of ${newName} has already been removed from server`)
+            setTimeout(()=>{
+              setNewNoti(null)
+            }, 5000)
+
+            setPersons(persons.filter(person => person.name !== newName))
           })
       }
     } else {
@@ -48,6 +66,12 @@ const App = () => {
       personService
         .create(newPerson)
         .then(createdPerson => {
+          setUserAction('added')
+          setNewNoti(`Added ${newName}`)
+          setTimeout(()=>{
+            setNewNoti(null)
+          }, 5000)
+
           setPersons(persons.concat(createdPerson))
           setNewName('')
           setNewNumber('')
@@ -56,9 +80,27 @@ const App = () => {
   }
 
   const handleDeletion = (id) => {
+    const callback = () => {
+      let person = persons.find(person => person.id === id)
+        setUserAction('deleted')
+        setNewNoti(`Information of ${person.name} has already been removed from server`)
+        setTimeout(()=>{
+          setNewNoti(null)
+        }, 5000)
+
+        setPersons(persons.filter(person => person.id !== id))
+    }
+    
     personService
       .remove(id)
       .then(response => {
+        let person = persons.find(person => person.id === id)
+        setUserAction('deleted')
+        setNewNoti(`Information of ${person.name} has already been removed from server`)
+        setTimeout(()=>{
+          setNewNoti(null)
+        }, 5000)
+
         setPersons(persons.filter(person => person.id !== id))
       })
   }
@@ -66,6 +108,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={newNoti} action={userAction}/>
       <Filter filter={newFilter} onFilterChange={onFilterChange} />
 
       <h3>Add a new</h3>
